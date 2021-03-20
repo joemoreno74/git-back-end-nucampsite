@@ -117,7 +117,7 @@ campsiteRouter.route('/:campsiteId/comments')
     res.statusCode = 403;
     res.end(`PUT operation not supported on /campsites/${req.params.campsiteId}/comments`);
 })
-.delete(authenticate.verifyUser,  (req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Campsite.findById(req.params.campsiteId)
     .then(campsite => {
         if (campsite) {
@@ -203,12 +203,10 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     .catch(err => next(err));
 })
 .delete(authenticate.verifyUser,  authenticate.verifyAdmin,  (req, res, next) => {
-    console.log(campsite.comments.id(req.params.commentId).author._id);
     Campsite.findById(req.params.campsiteId)
     .then(campsite => {
         if (campsite && campsite.comments.id(req.params.commentId)) {
             const campsiteCommentCheck = campsite.comments.id(req.params.commentId).author._id
-
             if (campsiteCommentCheck.equals(req.user._id)) {
                 campsite.comments.id(req.params.commentId).remove();
                 campsite.save()
